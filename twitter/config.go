@@ -1,4 +1,4 @@
-package nyaitter
+package twitter
 
 import (
 	"fmt"
