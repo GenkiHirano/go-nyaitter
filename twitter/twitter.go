@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/ChimeraCoder/anaconda"
 	"github.com/labstack/echo"
 )
 
@@ -38,4 +39,24 @@ func AuthTwitter(c echo.Context) error {
 
 	// 成功したらTwitterのログイン画面へ
 	return c.Redirect(http.StatusFound, uri)
+}
+
+func PostTwitterAPI(c echo.Context) error {
+	sess := session.Default(c)
+	token := sess.Get("token")
+	secret := sess.Get("secret")
+	if token == nil || secret == nil {
+		return c.JSON(http.StatusAccepted, "redirect")
+	}
+	api := anaconda.NewTwitterApi(token.(string), secret.(string))
+
+	message := c.FormValue("message")
+	tweet, error := api.PostTweet(message, nil)
+	if error != nil {
+		fmt.Println(error)
+		return c.JSON(http.StatusAccepted, "redirect")
+	}
+	link := "https://twitter.com/" + tweet.User.IdStr + "/status/" + tweet.IdStr
+
+	return c.JSON(http.StatusOK, link)
 }
