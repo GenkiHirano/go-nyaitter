@@ -13,6 +13,7 @@ import (
 func RunAPIServer() {
 	e := echo.New()
 	e.GET("/auth", twitter.AuthTwitter)
+	e.GET("/callback", twitter.Callback)
 
 	// サーバー開始
 	go func() {

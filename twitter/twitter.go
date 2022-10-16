@@ -68,22 +68,26 @@ func Callback(c echo.Context) error {
     return c.Redirect(http.StatusFound, "./tweet")
 }
 
-// func PostTwitterAPI(c echo.Context) error {
-// 	sess := session.Default(c)
-// 	token := sess.Get("token")
-// 	secret := sess.Get("secret")
-// 	if token == nil || secret == nil {
-// 		return c.JSON(http.StatusAccepted, "redirect")
-// 	}
-// 	api := anaconda.NewTwitterApi(token.(string), secret.(string))
+func PostTwitterAPI(c echo.Context) error {
+	sess := session.Default(c)
+	token := sess.Get("token")
+	secret := sess.Get("secret")
 
-// 	message := c.FormValue("message")
-// 	tweet, error := api.PostTweet(message, nil)
-// 	if error != nil {
-// 		fmt.Println(error)
-// 		return c.JSON(http.StatusAccepted, "redirect")
-// 	}
-// 	link := "https://twitter.com/" + tweet.User.IdStr + "/status/" + tweet.IdStr
+	if token == nil || secret == nil {
+		return c.JSON(http.StatusAccepted, "redirect")
+	}
 
-// 	return c.JSON(http.StatusOK, link)
-// }
+	api := anaconda.NewTwitterApi(token.(string), secret.(string))
+
+	message := c.FormValue("message")
+	tweet, err := api.PostTweet(message, nil)
+
+	if err != nil {
+		fmt.Println(err)
+		return c.JSON(http.StatusAccepted, "redirect")
+	}
+
+	link := "https://twitter.com/" + tweet.User.IdStr + "/status/" + tweet.IdStr
+
+	return c.JSON(http.StatusOK, link)
+}
