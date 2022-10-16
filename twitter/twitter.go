@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/ChimeraCoder/anaconda"
+	"github.com/garyburd/go-oauth/oauth"
+	session "github.com/ipfans/echo-session"
 	"github.com/labstack/echo"
 )
 
@@ -15,7 +17,7 @@ const (
 	test     = "http://localhost:3022/callback"
 )
 
-// ツイッターの認証開始
+// ツイッター認証
 func AuthTwitter(c echo.Context) error {
 	api := getTwitterAPI()
 	var url = callback
@@ -41,22 +43,47 @@ func AuthTwitter(c echo.Context) error {
 	return c.Redirect(http.StatusFound, uri)
 }
 
-func PostTwitterAPI(c echo.Context) error {
+// 読み取り後、コールバックから認証まで
+func Callback(c echo.Context) error {
+	token := c.QueryParam("oauth_token")
+	secret := c.QueryParam("oauth_verifier")
+	api := getTwitterAPI()
+
+	cred, _, err := api.GetCredentials(&oauth.Credentials{
+		Token: token,
+	}, secret)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	api = anaconda.NewTwitterApi(cred.Token, cred.Secret)
+
 	sess := session.Default(c)
-	token := sess.Get("token")
-	secret := sess.Get("secret")
-	if token == nil || secret == nil {
-		return c.JSON(http.StatusAccepted, "redirect")
-	}
-	api := anaconda.NewTwitterApi(token.(string), secret.(string))
+	sess.Set("token", cred.Token)
+    sess.Set("secret", cred.Secret)
+    sess.Save()
 
-	message := c.FormValue("message")
-	tweet, error := api.PostTweet(message, nil)
-	if error != nil {
-		fmt.Println(error)
-		return c.JSON(http.StatusAccepted, "redirect")
-	}
-	link := "https://twitter.com/" + tweet.User.IdStr + "/status/" + tweet.IdStr
-
-	return c.JSON(http.StatusOK, link)
+    return c.Redirect(http.StatusFound, "./tweet")
 }
+
+// func PostTwitterAPI(c echo.Context) error {
+// 	sess := session.Default(c)
+// 	token := sess.Get("token")
+// 	secret := sess.Get("secret")
+// 	if token == nil || secret == nil {
+// 		return c.JSON(http.StatusAccepted, "redirect")
+// 	}
+// 	api := anaconda.NewTwitterApi(token.(string), secret.(string))
+
+// 	message := c.FormValue("message")
+// 	tweet, error := api.PostTweet(message, nil)
+// 	if error != nil {
+// 		fmt.Println(error)
+// 		return c.JSON(http.StatusAccepted, "redirect")
+// 	}
+// 	link := "https://twitter.com/" + tweet.User.IdStr + "/status/" + tweet.IdStr
+
+// 	return c.JSON(http.StatusOK, link)
+// }

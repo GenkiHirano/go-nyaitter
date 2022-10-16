@@ -12,7 +12,7 @@ func getTwitterAPI() *anaconda.TwitterApi {
 	loadEnv()
 	anaconda.SetConsumerKey(os.Getenv("CONSUMER_KEY"))
 	anaconda.SetConsumerSecret(os.Getenv("CONSUMER_KEY_SECRET"))
-	api := anaconda.NewTwitterApi("","")
+	api := anaconda.NewTwitterApi("", "")
 	return api
 }
 
