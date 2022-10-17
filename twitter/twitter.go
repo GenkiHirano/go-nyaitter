@@ -62,10 +62,10 @@ func Callback(c echo.Context) error {
 
 	sess := session.Default(c)
 	sess.Set("token", cred.Token)
-    sess.Set("secret", cred.Secret)
-    sess.Save()
+	sess.Set("secret", cred.Secret)
+	sess.Save()
 
-    return c.Redirect(http.StatusFound, "./tweet")
+	return c.Redirect(http.StatusFound, "./tweet")
 }
 
 func PostTwitterAPI(c echo.Context) error {
