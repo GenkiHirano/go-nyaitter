@@ -6,3 +6,8 @@
 
 - ツイート機能
   - curl --request POST --url http://localhost:3022/post --data input=テストツイート
+
+# URL
+
+- Twitter ログイン画面
+  - localhost:3022/auth
